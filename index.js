@@ -18,13 +18,52 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+const isInvalidDate = date => date.toUTCString() === "Invalid Date";
 
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
+app.get("/api/:date?", function (req, res){
+  // ? means that it is optional so we set a default to be current time
+  if(!req.params.date){
+    res.json({
+      unix: new Date().getTime(),
+      utc: new Date().toUTCString()
+    })
+    return;
+  } else {
+     // Parse date parameter as a number (UNIX timestamp)
+     // Unix timestamp must be number when passing into new Date
+     const timestamp = parseInt(req.params.date);
 
-
+     // Check if the parsed timestamp is valid
+     if (!isNaN(timestamp)) {
+        // isNaN
+       const date = new Date(timestamp);
+ 
+       // If the date is invalid, return error
+       if (isInvalidDate(date)) {
+         res.json({ error : "Invalid Date" });
+         return;
+       }
+ 
+       // Send response with UNIX timestamp and UTC string
+       res.json({unix: date.getTime(), utc: date.toUTCString()});
+       return;
+     } else {
+       // Parse date parameter as a date string
+       const date = new Date(req.params.date);
+ 
+       // If the date is invalid, return error
+       if (isInvalidDate(date)) {
+         res.json({ error : "Invalid Date" });
+         return;
+       }
+ 
+       // Send response with UNIX timestamp and UTC string
+       res.json({unix: date.getTime(), utc: date.toUTCString()});
+       return;
+     }
+  }
+})
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
