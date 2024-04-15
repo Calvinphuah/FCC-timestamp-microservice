@@ -32,36 +32,24 @@ app.get("/api/:date?", function (req, res){
   } else {
      // Parse date parameter as a number (UNIX timestamp)
      // Unix timestamp must be number when passing into new Date
-     const timestamp = parseInt(req.params.date);
+     const dateInput = req.params.date;
+     let date;
+ 
+    // Check if the date input is a valid Unix timestamp (a string representing a number)
+    if (!isNaN(dateInput)) {
+      date = new Date(parseInt(dateInput)); // Parse as Unix timestamp
+    } else {
+      date = new Date(dateInput); // Parse as date string
+    }
+    
+    if(isInvalidDate(date)){
+      res.json({ error : "Invalid Date" });
+      return;
+    }
 
-     // Check if the parsed timestamp is valid
-     if (!isNaN(timestamp)) {
-        // isNaN
-       const date = new Date(timestamp);
- 
-       // If the date is invalid, return error
-       if (isInvalidDate(date)) {
-         res.json({ error : "Invalid Date" });
-         return;
-       }
- 
-       // Send response with UNIX timestamp and UTC string
-       res.json({unix: date.getTime(), utc: date.toUTCString()});
-       return;
-     } else {
-       // Parse date parameter as a date string
-       const date = new Date(req.params.date);
- 
-       // If the date is invalid, return error
-       if (isInvalidDate(date)) {
-         res.json({ error : "Invalid Date" });
-         return;
-       }
- 
-       // Send response with UNIX timestamp and UTC string
-       res.json({unix: date.getTime(), utc: date.toUTCString()});
-       return;
-     }
+    // Send response with UNIX timestamp and UTC string
+    res.json({unix: date.getTime(), utc: date.toUTCString()});
+    return;
   }
 })
 
